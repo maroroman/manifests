@@ -1,0 +1,105 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment
+spec:
+  replicas: 1
+  revisionHistoryLimit: 1
+  progressDeadlineSeconds: 600
+  selector: {}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  template:
+    spec:
+      serviceAccount: jupyter-auth-server-service-account
+      serviceAccountName: jupyter-auth-server-service-account
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      containers:
+        - name: ose-oauth-proxy
+          image: registry.redhat.io/openshift4/ose-oauth-proxy
+          imagePullPolicy: IfNotPresent
+          args:
+            - --provider=openshift
+            - --https-address=:8443
+            - --http-address=
+            - --client-id=system:serviceaccount:$(AUTH_SERVER_NAMESPACE):jupyter-auth-server-service-account
+            - --client-secret-file=/var/run/secrets/kubernetes.io/serviceaccount/token
+            - --cookie-secret-file=/etc/proxy/secrets/session_secret
+            - --tls-cert=/etc/tls/private/tls.crt
+            - --tls-key=/etc/tls/private/tls.key
+            - --upstream=http://localhost:8000
+            - --upstream-ca=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+            - --skip-auth-regex=^/metrics
+            - --email-domain=*
+          ports:
+            - containerPort: 8443
+              name: oauth-proxy
+              protocol: TCP
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /oauth/healthz
+              port: oauth-proxy
+              scheme: HTTPS
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /oauth/healthz
+              port: oauth-proxy
+              scheme: HTTPS
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 200m
+              memory: 150Mi
+            requests:
+              cpu: 100m
+              memory: 50Mi
+          volumeMounts:
+            - name: jupyter-auth-server-proxy-secret
+              mountPath: /etc/proxy/secrets
+            - name: jupyter-auth-server-tls-secret
+              mountPath: /etc/tls/private
+        - name: jupyter-authz-server
+          image: quay.io/verygoodsecurity/httpbin
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: GUNICORN_CMD_ARGS
+              value: >-
+                --capture-output
+                --error-logfile -
+                --access-logfile -
+                --access-logformat '%(h)s %(t)s %(r)s %(s)s Host: %({Host}i)s}'
+          ports:
+            - name: authz-server
+              containerPort: 8000
+              protocol: TCP
+          resources:
+            limits:
+              cpu: "500m"
+              memory: 128Mi
+            requests:
+              cpu: "500m"
+              memory: 128Mi
+      volumes:
+        - name: jupyter-auth-server-proxy-secret
+          secret:
+            defaultMode: 420
+            secretName: jupyter-auth-server-proxy-config
+        - name: jupyter-auth-server-tls-secret
+          secret:
+            defaultMode: 420
+            secretName: jupyter-auth-server-tls

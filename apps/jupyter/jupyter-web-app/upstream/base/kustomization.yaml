@@ -15,15 +15,21 @@ resources:
 - service-account.yaml
 - service.yaml
 - configs/logos-configmap.yaml
+- ose-oauth-proxy/secrets.yaml
 namePrefix: jupyter-web-app-
-namespace: kubeflow
+namespace: kfnbc-odh
 commonLabels:
   app: jupyter-web-app
   kustomize.component: jupyter-web-app
 images:
 - name: public.ecr.aws/j1r0q0g6/notebooks/jupyter-web-app
-  newName: public.ecr.aws/j1r0q0g6/notebooks/jupyter-web-app
-  newTag: v1.4
+  # newName: public.ecr.aws/j1r0q0g6/notebooks/jupyter-web-app
+  # newTag: master-0c6c738e # https://github.com/kubeflow/kubeflow/pull/6206
+  newName: quay.io/samuvl/jupyter-web-app
+  newTag: v1.2-rc.0-175-gaad2655b
+- name: registry.redhat.io/openshift4/ose-oauth-proxy
+  newName: registry.redhat.io/openshift4/ose-oauth-proxy
+  newTag: "v4.9"
 # We need the name to be unique without the suffix because the original name is what
 # gets used with patches
 configMapGenerator:
@@ -76,3 +82,5 @@ vars:
     apiVersion: v1
     kind: ConfigMap
     name: parameters
+patchesStrategicMerge:
+  - ose-oauth-proxy/deployment-patch.yaml

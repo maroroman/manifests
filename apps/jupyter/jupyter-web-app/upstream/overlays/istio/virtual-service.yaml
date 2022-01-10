@@ -8,7 +8,12 @@ spec:
   hosts:
   - '*'
   http:
-  - headers:
+  - route:
+    - destination:
+        host: jupyter-web-app-service.$(JWA_NAMESPACE).svc.$(JWA_CLUSTER_DOMAIN)
+        port:
+          number: 80
+    headers:
       request:
         add:
           x-forwarded-prefix: /jupyter
@@ -17,8 +22,3 @@ spec:
         prefix: /jupyter/
     rewrite:
       uri: /
-    route:
-    - destination:
-        host: jupyter-web-app-service.$(JWA_NAMESPACE).svc.$(JWA_CLUSTER_DOMAIN)
-        port:
-          number: 80

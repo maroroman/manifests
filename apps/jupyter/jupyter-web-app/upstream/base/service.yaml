@@ -4,10 +4,12 @@ metadata:
   labels:
     run: jupyter-web-app
   name: service
+  annotations:
+    service.alpha.openshift.io/serving-cert-secret-name: jupyter-web-app-tls
 spec:
   ports:
-  - name: http
-    port: 80
+  - name: oauth-proxy
+    port: 443
     protocol: TCP
-    targetPort: 5000
+    targetPort: oauth-proxy
   type: ClusterIP

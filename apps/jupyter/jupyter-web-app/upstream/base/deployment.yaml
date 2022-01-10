@@ -12,8 +12,11 @@ spec:
       containers:
       - name: jupyter-web-app
         image: public.ecr.aws/j1r0q0g6/notebooks/jupyter-web-app
+        imagePullPolicy: Always
         ports:
-        - containerPort: 5000
+          - containerPort: 5000
+            name: jwa-ui
+            protocol: TCP
         volumeMounts:
         - mountPath: /etc/config
           name: config-volume
