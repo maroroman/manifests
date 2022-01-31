@@ -3,7 +3,7 @@ kind: Kustomization
 namespace: kubeflow
 resources:
 #- ../../../../jupyter/notebook-controller/base_v3
-- ../../../../../apps/jupyter/notebook-controller/upstream/overlays/kubeflow
+- ../../../../../apps/jupyter/notebook-controller/upstream/overlays/standalone
 
 patchesStrategicMerge:
 - ./configs/addfsgroup-env.yaml
