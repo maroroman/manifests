@@ -22,8 +22,11 @@ commonLabels:
   kustomize.component: jupyter-web-app
 images:
 - name: public.ecr.aws/j1r0q0g6/notebooks/jupyter-web-app
-  newName: public.ecr.aws/j1r0q0g6/notebooks/jupyter-web-app
-  newTag: v1.3.0-rc.1
+  newName: quay.io/samuvl/jupyter-web-app
+  newTag: v1.2-rc.0-175-gaad2655b
+- name: registry.redhat.io/openshift4/ose-oauth-proxy
+  newName: registry.redhat.io/openshift4/ose-oauth-proxy
+  newTag: "v4.9"
 # We need the name to be unique without the suffix because the original name is what
 # gets used with patches
 configMapGenerator:

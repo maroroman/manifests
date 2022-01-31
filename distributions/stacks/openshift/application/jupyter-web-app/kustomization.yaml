@@ -3,8 +3,8 @@ kind: Kustomization
 namespace: kubeflow
 resources:
 #- ../../../../jupyter/jupyter-web-app/base_v3
-- ../../../../../apps/jupyter/jupyter-web-app/upstream/overlays/istio
-
+- ../../../../../apps/jupyter/jupyter-web-app/upstream/base
+- ose-oauth-proxy
 patchesStrategicMerge:
 - addnoauthflags.yaml
 #No need to build new image, added flags to deployment
@@ -13,3 +13,14 @@ patchesStrategicMerge:
 #  newTag: v2.0.0
 #  newName: quay.io/kubeflow/jupyter-web-app
 
+patchesJson6902:
+- target:
+    kind: ServiceAccount
+    version: v1
+    name: service-account
+  path: service-account.yaml
+- target:
+    kind: Service
+    version: v1
+    name: service
+  path: service.yaml

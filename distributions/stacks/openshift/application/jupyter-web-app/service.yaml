@@ -1,0 +1,8 @@
+- op: add
+  path: /metadata/annotations
+  value: 
+    service.alpha.openshift.io/serving-cert-secret-name: jupyter-web-app-tls
+- op: add
+  path: /spec/ports[0]
+  value: 
+    targetPort: oauth-proxy
